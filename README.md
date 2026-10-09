@@ -54,6 +54,23 @@ parley-files-sftp, -ftp or -jdbc on their classpath to connect to those.
 The browsing model they share with any other UI (listing, sorting, what can be picked, history) is
 UI-free and lives in parley-files, package `us.bringardner.parley.files.browse`.
 
+## Swing alternatives
+
+What to use from [parley-files-swing](https://github.com/tony-bringardner/parley-files-swing) in a
+Swing application instead.
+
+| parley-files-fx | In parley-files-swing |
+|---|---|
+| `FileSourceChooser` | `FileSourceChooserDialog` |
+| `ConnectionSettingsForm` | `ConnectionSettingsPanel` |
+| `ConnectionDialog` | `FactoryPropertiesDialog` |
+| `RecentFileMenu` | `RecentFileMenu`, which shares its list with this one |
+| `FileTable`, `PathBar`, `FolderTree` | None as separate classes; they're inside `FileSourceChooserDialog` |
+
+parley-files-swing also has drag and drop of `FileSource`s (`FileSourceTransferable`), a Swing
+progress monitor for listings (`ProgressMonitorProgress`), and `FileSourceExamineDialog` and
+`BackupDialog`, which have no JavaFX version yet.
+
 ## Requirements
 
 - Java 17 (JavaFX 21). The other Parley modules stay at Java 11.
