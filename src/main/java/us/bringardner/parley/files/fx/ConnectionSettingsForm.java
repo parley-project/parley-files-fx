@@ -60,7 +60,7 @@ import us.bringardner.parley.files.FileSourceFactory;
 /**
  * A JavaFX form for any factory's {@link ConnectionSetting}s: a field of the right kind for
  * each, the settings that don't apply hidden, and the advanced ones behind a check box.
- * The JavaFX twin of parley-files' Swing ConnectionSettingsPanel; both work from the same
+ * The JavaFX twin of parley-files-swing's ConnectionSettingsPanel; both work from the same
  * descriptions and {@link ConnectionSettings}, so they behave the same.
  * <p>
  * Use it on the JavaFX application thread.

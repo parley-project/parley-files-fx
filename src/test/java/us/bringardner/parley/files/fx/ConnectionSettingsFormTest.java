@@ -18,7 +18,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import us.bringardner.parley.files.ConnectionSetting;
 
-/** The JavaFX form drawn from connection settings; it behaves like the Swing ConnectionSettingsPanel. */
+/** The JavaFX form drawn from connection settings; it behaves like parley-files-swing's ConnectionSettingsPanel. */
 public class ConnectionSettingsFormTest {
 
 	static final List<ConnectionSetting> SETTINGS = List.of(

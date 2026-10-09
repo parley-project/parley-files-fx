@@ -3,7 +3,7 @@
 JavaFX user interface for [parley-files](https://github.com/tony-bringardner/parley-files):
 
 - `ConnectionSettingsForm`: a form for any file system's connection settings, drawn from
-  `FileSourceFactory.getConnectionSettings()` (the JavaFX twin of parley-files' Swing
+  `FileSourceFactory.getConnectionSettings()` (the JavaFX twin of parley-files-swing's
   `ConnectionSettingsPanel`).
 - `ConnectionDialog`: choose a file system type, fill in its settings and connect, in the
   background.

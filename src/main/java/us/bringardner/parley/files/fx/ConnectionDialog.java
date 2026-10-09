@@ -53,7 +53,7 @@ import us.bringardner.parley.files.FileSourceFactory;
  * {@link ConnectionSettingsForm}), then connect. The values are checked first; connecting
  * runs in the background. The result is the connected factory, or none if canceled.
  * <p>
- * The JavaFX twin of parley-files' Swing FactoryPropertiesDialog.
+ * The JavaFX twin of parley-files-swing's FactoryPropertiesDialog.
  */
 public class ConnectionDialog extends Dialog<FileSourceFactory> {
 

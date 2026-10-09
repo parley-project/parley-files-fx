@@ -26,7 +26,7 @@ parley-io, parley-files, parley-files-sftp, -ftp, -jdbc.
 - The logic every UI shares (which settings apply, validation, the values to connect with) is in
   parley-files (`ConnectionSetting`, `ConnectionSettings`). Keep it there, not here, so the Swing
   and JavaFX UIs behave the same.
-- `ConnectionSettingsForm` mirrors parley-files' Swing `ConnectionSettingsPanel`; a change to one
+- `ConnectionSettingsForm` mirrors parley-files-swing's `ConnectionSettingsPanel`; a change to one
   usually belongs in the other too.
 - The browsing logic (listing, sorting, which entries can be picked, back/forward) is UI-free, in
   parley-files' `us.bringardner.parley.files.browse`. The views here (`FileTable`, `PathBar`,
