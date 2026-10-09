@@ -62,7 +62,7 @@
 		<!-- RecentItemsMenu, which RecentFileMenu is built on -->
 		<dependency>
 			<groupId>us.bringardner</groupId>
-			<artifactId>fx-widgets</artifactId>
+			<artifactId>bringardner-fx-widgets</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<!-- javafx-graphics and javafx-base come with it, for this platform -->
