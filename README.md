@@ -10,6 +10,10 @@ JavaFX user interface for [parley-files](https://github.com/tony-bringardner/par
 
 - `FileSourceChooser`: open and save dialogs for `FileSource`s on any file system (local, or remote
   through "Connect to..."), used like JavaFX's `FileChooser`, which only knows local files.
+- `RecentFileMenu`: a recent-files menu that can reopen remote files, the JavaFX twin of
+  parley-files-swing's. Secrets are never saved; it asks for them, then connects in the background
+  and passes the `FileSource` to `setOnOpened`. Built on fx-widgets' `RecentItemsMenu`, with
+  parley-files' `RecentFile` entries, so it shares its list with the Swing menu.
 - The pieces it's built from, for other views (a Finder-like browser is next): `FileTable` (a
   directory's files, listed in the background), `PathBar` and `FolderTree`.
 

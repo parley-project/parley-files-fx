@@ -33,4 +33,6 @@ parley-io, parley-files, parley-files-sftp, -ftp, -jdbc.
   `FolderTree`, and `ChooserPane` inside `FileSourceChooser`) only show it.
 - File system work runs off the JavaFX thread (`Background.EXECUTOR`); results come back with
   `Task` handlers. A view must never list a directory on the JavaFX thread.
+- `RecentFileMenu` mirrors parley-files-swing's; the entry logic is parley-files' `RecentFile`, and
+  the menu itself fx-widgets' `RecentItemsMenu`.
 - `ChooserPane` holds the chooser's workings so tests can drive it without showing a dialog.
