@@ -138,8 +138,8 @@ public class FolderTree extends TreeView<FileSource> {
 	}
 
 	private void relistAll(TreeItem<FileSource> item) {
-		if( item instanceof FolderItem f ) {
-			f.relist();
+		if( item instanceof FolderItem ) {
+			((FolderItem) item).relist();
 		}
 		for(TreeItem<FileSource> kid : new ArrayList<>(item.getChildren())) {
 			relistAll(kid);

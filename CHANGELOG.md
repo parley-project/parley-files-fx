@@ -2,7 +2,7 @@
 
 ## parley-files-fx 1.0.0 (unreleased)
 
-First version.
+First version. Runs on Java 11, like the other Parley modules, with JavaFX 17 LTS.
 
 - `ConnectionSettingsForm`: a JavaFX form drawn from a factory's `ConnectionSetting`s, with the
   same behaviour as parley-files' Swing `ConnectionSettingsPanel` (they share `ConnectionSettings`):

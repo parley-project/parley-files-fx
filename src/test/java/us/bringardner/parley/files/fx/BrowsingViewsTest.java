@@ -146,15 +146,15 @@ public class BrowsingViewsTest {
 		List<String> labels = Fx.call(()->{
 			bar.setDirectory(inner);
 			List<String> ret = new ArrayList<>();
-			bar.getChildren().forEach(n->{ if( n instanceof Button b ) ret.add(b.getText()); });
+			bar.getChildren().forEach(n->{ if( n instanceof Button ) ret.add(((Button) n).getText()); });
 			return ret;
 		});
 		assertEquals(List.of(dir.getName(), "sub", "inner"), labels.subList(labels.size()-3, labels.size()));
 		Fx.run(()->{
 			Button sub = null;
 			for(var n : bar.getChildren()) {
-				if( n instanceof Button b && b.getText().equals("sub")) {
-					sub = b;
+				if( n instanceof Button && ((Button) n).getText().equals("sub")) {
+					sub = (Button) n;
 				}
 			}
 			// firing rebuilds the bar

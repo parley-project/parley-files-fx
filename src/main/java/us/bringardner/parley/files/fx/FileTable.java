@@ -91,10 +91,23 @@ public class FileTable extends StackPane {
 	private final VBox overlay;
 	private final Label message = new Label();
 
+	/**
+	 * The columns fill the table and the last one takes what is left (JavaFX 20's
+	 * CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN); before JavaFX 20, the columns share it.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	static javafx.util.Callback<TableView.ResizeFeatures, Boolean> flexLastColumn() {
+		try {
+			return (javafx.util.Callback) TableView.class.getField("CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN").get(null);
+		} catch (ReflectiveOperationException e) {
+			return TableView.CONSTRAINED_RESIZE_POLICY;
+		}
+	}
+
 	public FileTable() {
 		table.setItems(shown);
 		table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+		table.setColumnResizePolicy(flexLastColumn());
 
 		TableColumn<FileEntry,FileEntry> name = new TableColumn<>("Name");
 		name.setCellValueFactory(c->new ReadOnlyObjectWrapper<>(c.getValue()));

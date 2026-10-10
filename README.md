@@ -16,11 +16,11 @@ The logic every UI needs (which connection settings apply, listing and sorting, 
 recent files entry saves) stays in parley-files, without a UI. This library and parley-files-swing
 only show it, so the JavaFX and Swing UIs behave the same and share one recent files list.
 
-It's separate from parley-files-swing because JavaFX needs Java 17 and its own native libraries,
-which a Swing application shouldn't have to carry.
+It's separate from parley-files-swing because JavaFX needs its own native libraries, which a Swing
+application shouldn't have to carry.
 
-**Use parley-files-fx** when your application's UI is JavaFX. For a Swing application, or one that
-must run on Java 11, use parley-files-swing.
+**Use parley-files-fx** when your application's UI is JavaFX. For a Swing application, use
+parley-files-swing.
 
 ## What's inside
 
@@ -73,7 +73,8 @@ progress monitor for listings (`ProgressMonitorProgress`), and `FileSourceExamin
 
 ## Requirements
 
-- Java 17 (JavaFX 21). The other Parley modules stay at Java 11.
+- Java 11, like the other Parley modules, with JavaFX 17 LTS (17.0.20). On JavaFX 20 or later the
+  file table's last column takes the spare width; on 17 every column shares it.
 - parley-files and [fx-widgets](https://github.com/tony-bringardner/fx-widgets)
 
 ## Building

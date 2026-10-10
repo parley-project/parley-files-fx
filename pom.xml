@@ -19,9 +19,8 @@
 	<properties>
 		<!-- Written to the jar manifest as Automatic-Module-Name -->
 		<parley.moduleName>us.bringardner.parley.files.fx</parley.moduleName>
-		<!-- JavaFX 21 needs Java 17; the other Parley modules stay at 11 -->
-		<maven.compiler.release>17</maven.compiler.release>
-		<javafx.version>21.0.2</javafx.version>
+		<!-- Java 11 like the other Parley modules (from parley-parent): JavaFX 17 LTS runs on 11 -->
+		<javafx.version>17.0.20</javafx.version>
 	</properties>
 
 	<!-- GitHub Packages, used by release.sh. Maven Central releases use: mvn -Prelease clean deploy -->

@@ -1,7 +1,7 @@
 # parley-files-fx
 
 JavaFX user interface for parley-files (Parley, formerly the Bringardner Java Library). Owner: Tony
-Bringardner. **Java 17** (JavaFX 21 needs it; the other Parley modules are Java 11), Maven, JUnit 5.
+Bringardner. **Java 11** like the other Parley modules (JavaFX 17 LTS, which runs on 11), Maven, JUnit 5.
 Related repos live next to this one in `/Volumes/Data/eclipse-git/`: parley-parent, parley-core,
 parley-io, parley-files, parley-files-sftp, -ftp, -jdbc.
 

@@ -82,15 +82,16 @@ public class ConnectionSettingsForm extends VBox {
 		}
 
 		String value() {
-			if( editor instanceof TextArea area ) {
-				return area.getText();
-			} else if( editor instanceof TextInputControl text ) {
+			if( editor instanceof TextArea ) {
+				return ((TextArea) editor).getText();
+			} else if( editor instanceof TextInputControl ) {
 				// a TextField or PasswordField
+				TextInputControl text = (TextInputControl) editor;
 				return editor instanceof PasswordField ? text.getText() : text.getText().trim();
-			} else if( editor instanceof CheckBox box ) {
-				return ""+box.isSelected();
-			} else if( editor instanceof ComboBox<?> box ) {
-				Object item = box.getValue();
+			} else if( editor instanceof CheckBox ) {
+				return ""+((CheckBox) editor).isSelected();
+			} else if( editor instanceof ComboBox<?> ) {
+				Object item = ((ComboBox<?>) editor).getValue();
 				return item == null ? "" : item.toString();
 			}
 			return "";
@@ -227,9 +228,9 @@ public class ConnectionSettingsForm extends VBox {
 			field = text;
 		}
 		}
-		if( editor instanceof TextInputControl text ) {
+		if( editor instanceof TextInputControl ) {
 			// settings can depend on a text value too
-			text.textProperty().addListener((o, was, is)->updateVisibility());
+			((TextInputControl) editor).textProperty().addListener((o, was, is)->updateVisibility());
 		}
 		if( !s.description().isEmpty()) {
 			label.setTooltip(new Tooltip(s.description()));
