@@ -71,6 +71,19 @@ parley-files-swing also has drag and drop of `FileSource`s (`FileSourceTransfera
 progress monitor for listings (`ProgressMonitorProgress`), and `FileSourceExamineDialog` and
 `BackupDialog`, which have no JavaFX version yet.
 
+## Changing the look
+
+The library never forces Parley's look on your application. Its pictures are drawn as shapes with
+style classes, so your own stylesheet can restyle them:
+
+```css
+.folder-icon { -fx-fill: #e8c46a; -fx-stroke: #8a6d1f; }
+.file-icon   { -fx-fill: white;   -fx-stroke: #666666; }
+.path-button { -fx-font-weight: bold; }
+```
+
+Stylesheet rules take precedence over the colors the library sets in code.
+
 ## Requirements
 
 - Java 11, like the other Parley modules, with JavaFX 17 LTS (17.0.20). On JavaFX 20 or later the
