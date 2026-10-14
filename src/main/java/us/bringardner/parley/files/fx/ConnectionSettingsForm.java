@@ -27,6 +27,7 @@ package us.bringardner.parley.files.fx;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,28 +35,39 @@ import java.util.Properties;
 
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import us.bringardner.parley.files.ConnectionSetting;
 import us.bringardner.parley.files.ConnectionSettings;
 import us.bringardner.parley.files.FileSourceFactory;
+import us.bringardner.parley.files.credentials.CredentialException;
+import us.bringardner.parley.files.credentials.CredentialProvider;
+import us.bringardner.parley.files.credentials.CredentialRef;
+import us.bringardner.parley.files.credentials.Credentials;
 
 /**
  * A JavaFX form for any factory's {@link ConnectionSetting}s: a field of the right kind for
@@ -73,6 +85,8 @@ public class ConnectionSettingsForm extends VBox {
 		final Label label;
 		final Node field;
 		final Control editor;
+		/** For a secret: store a typed password in the keychain; null when there's no keychain. */
+		CheckBox saveToKeychain;
 
 		Row(ConnectionSetting setting, Label label, Node field, Control editor) {
 			this.setting = setting;
@@ -105,6 +119,8 @@ public class ConnectionSettingsForm extends VBox {
 	private final GridPane grid = new GridPane();
 	private final CheckBox showAdvanced = new CheckBox("Show advanced settings");
 	private final Label none = new Label("There are no connection settings for this file system.");
+	/** The factory's type id, for the keychain entry a typed password is saved as; null if unknown. */
+	private String factoryId;
 
 	public ConnectionSettingsForm() {
 		setSpacing(8);
@@ -151,6 +167,7 @@ public class ConnectionSettingsForm extends VBox {
 
 	/** Fills the form with factory's settings and current values. */
 	public void setFactory(FileSourceFactory factory) {
+		factoryId = factory.getTypeId();
 		setSettings(factory.getConnectionSettings(), factory.getConnectProperties());
 	}
 
@@ -162,11 +179,52 @@ public class ConnectionSettingsForm extends VBox {
 		Node field;
 		switch (s.kind()) {
 		case SECRET: {
+			// a reference (@keychain:...) isn't a secret: it's shown in clear, a password masked.
+			// Two fields share one text; the one that fits the value is shown.
 			PasswordField pw = new PasswordField();
+			TextField clear = new TextField();
+			clear.textProperty().bindBidirectional(pw.textProperty());
 			pw.setText(value);
+			StackPane both = new StackPane(pw, clear);
+			Button fromStore = new Button("From store...");
+			fromStore.setTooltip(new Tooltip("Use a secret kept in a credential store, such as @keychain:parley/prod-db"));
+			fromStore.setOnAction(e->chooseReference(pw, fromStore));
+			HBox line = new HBox(4, both, fromStore);
+			HBox.setHgrow(both, Priority.ALWAYS);
+			VBox box = new VBox(4, line);
+			CheckBox save = keychainCanStore() ? new CheckBox("Save to keychain") : null;
+			if( save != null ) {
+				save.setTooltip(new Tooltip("Keep the password in the keychain, and only a reference to it here"));
+				box.getChildren().add(save);
+			}
+			Runnable show = ()->{
+				boolean ref = CredentialRef.isReference(pw.getText());
+				boolean moveFocus = (ref ? pw : clear).isFocused();
+				clear.setVisible(ref);
+				pw.setVisible(!ref);
+				if( moveFocus ) {
+					TextField now = ref ? clear : pw;
+					now.requestFocus();
+					now.positionCaret(now.getText().length());
+				}
+				if( save != null ) {
+					save.setDisable(ref || pw.getText().isEmpty());
+				}
+			};
+			show.run();
+			pw.textProperty().addListener((o, was, is)->show.run());
 			editor = pw;
-			field = pw;
-			break;
+			field = box;
+			Row row = new Row(s, label, field, editor);
+			row.saveToKeychain = save;
+			pw.textProperty().addListener((o, was, is)->updateVisibility());
+			if( !s.description().isEmpty()) {
+				label.setTooltip(new Tooltip(s.description()));
+				pw.setTooltip(new Tooltip(s.description()));
+				clear.setTooltip(new Tooltip(s.description()));
+			}
+			label.setLabelFor(pw);
+			return row;
 		}
 		case MULTILINE_SECRET: {
 			TextArea area = new TextArea(value);
@@ -240,6 +298,96 @@ public class ConnectionSettingsForm extends VBox {
 		return new Row(s, label, field, editor);
 	}
 
+	/** True if a keychain provider is installed, works here and can store secrets. */
+	private static boolean keychainCanStore() {
+		return Credentials.get("keychain").filter(p->p.isAvailable() && p.canStore()).isPresent();
+	}
+
+	/** A menu of the references the credential stores can list, and an item to type one. */
+	private void chooseReference(PasswordField field, Button under) {
+		ContextMenu menu = new ContextMenu();
+		for(String ref : storedReferences()) {
+			MenuItem item = new MenuItem(ref);
+			item.setOnAction(e->field.setText(ref));
+			menu.getItems().add(item);
+		}
+		if( menu.getItems().isEmpty()) {
+			MenuItem nothing = new MenuItem("No stored secrets to list");
+			nothing.setDisable(true);
+			menu.getItems().add(nothing);
+		}
+		menu.getItems().add(new SeparatorMenuItem());
+		MenuItem type = new MenuItem("Type a reference...");
+		type.setOnAction(e->{
+			TextInputDialog d = new TextInputDialog("@keychain:parley/");
+			d.setTitle("Use a stored secret");
+			d.setHeaderText(null);
+			d.setContentText("A reference, such as @keychain:parley/prod-db or @env:DB_PASSWORD:");
+			d.showAndWait().map(String::trim).ifPresent(v->{
+				if( CredentialRef.isReference(v)) {
+					field.setText(v);
+				} else {
+					new Alert(Alert.AlertType.WARNING, "'"+v+"' isn't a reference: use @scheme:locator").showAndWait();
+				}
+			});
+		});
+		menu.getItems().add(type);
+		menu.show(under, Side.BOTTOM, 0, 0);
+	}
+
+	/**
+	 * The references the available credential stores can list (a keychain can't be listed; a
+	 * locked keystore is left out rather than asking for its master password here).
+	 */
+	static List<String> storedReferences() {
+		List<String> ret = new ArrayList<>();
+		for(CredentialProvider p : Credentials.providers()) {
+			if( !p.isAvailable() || !p.canStore()) {
+				continue;
+			}
+			try {
+				for(CredentialRef r : p.list()) {
+					ret.add(r.toString());
+				}
+			} catch (CredentialException e) {
+				// can't be listed now
+			}
+		}
+		return ret;
+	}
+
+	/**
+	 * Saves typed passwords whose "Save to keychain" box is ticked, and puts a reference to
+	 * each in its field instead. A failure is shown and the password is left as typed.
+	 */
+	private void saveTypedSecretsToKeychain(Properties values) {
+		for(Row r : rows.values()) {
+			CheckBox save = r.saveToKeychain;
+			if( save == null || !save.isSelected() || !(r.editor instanceof PasswordField)) {
+				continue;
+			}
+			PasswordField pw = (PasswordField) r.editor;
+			String typed = pw.getText();
+			if( typed.isEmpty() || CredentialRef.isReference(typed)) {
+				continue;
+			}
+			char[] secret = typed.toCharArray();
+			try {
+				CredentialRef ref = ConnectionSettings.suggestedKeychainRef(factoryId,
+						values.getProperty("user"), values.getProperty("host"));
+				Credentials.store(ref, secret);
+				pw.setText(ref.toString());
+				save.setSelected(false);
+			} catch (CredentialException e) {
+				if( getScene() != null ) {
+					new Alert(Alert.AlertType.WARNING, "The password wasn't saved to the keychain:\n"+e.getMessage()).showAndWait();
+				}
+			} finally {
+				Arrays.fill(secret, '\0');
+			}
+		}
+	}
+
 	private void browse(TextField text) {
 		FileChooser fc = new FileChooser();
 		String current = text.getText().trim();
@@ -297,6 +445,7 @@ public class ConnectionSettingsForm extends VBox {
 
 	/** The properties to connect with (settings that don't apply are emptied). */
 	public Properties getConnectionProperties() {
+		saveTypedSecretsToKeychain(currentValues());
 		return ConnectionSettings.forConnect(settings, currentValues());
 	}
 
@@ -313,6 +462,17 @@ public class ConnectionSettingsForm extends VBox {
 	Control fieldFor(String key) {
 		Row r = rows.get(key);
 		return r == null ? null : r.editor;
+	}
+
+	/** The "Save to keychain" box for a secret setting, for tests; null if there's none. */
+	CheckBox saveToKeychainFor(String key) {
+		Row r = rows.get(key);
+		return r == null ? null : r.saveToKeychain;
+	}
+
+	/** Sets the factory type id used to name keychain entries, for tests. */
+	void setFactoryId(String id) {
+		factoryId = id;
 	}
 
 	/** The label and field for key are shown (for tests). */

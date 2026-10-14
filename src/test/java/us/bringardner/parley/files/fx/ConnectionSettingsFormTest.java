@@ -119,4 +119,76 @@ public class ConnectionSettingsFormTest {
 			assertEquals("kept", form.getConnectionProperties().getProperty("other"));
 		});
 	}
+
+	/** A keychain in memory that can list what it holds. */
+	static class FakeKeychain implements us.bringardner.parley.files.credentials.CredentialProvider {
+		final java.util.Map<String, String> entries = new java.util.TreeMap<>();
+		@Override public String scheme() { return "keychain"; }
+		@Override public boolean isAvailable() { return true; }
+		@Override public boolean canStore() { return true; }
+		@Override public char[] resolve(us.bringardner.parley.files.credentials.CredentialRef ref,
+				us.bringardner.parley.files.credentials.CredentialRequest req) {
+			return entries.get(ref.locator()).toCharArray();
+		}
+		@Override public void store(us.bringardner.parley.files.credentials.CredentialRef ref, char[] secret) {
+			entries.put(ref.locator(), new String(secret));
+		}
+		@Override public List<us.bringardner.parley.files.credentials.CredentialRef> list() {
+			List<us.bringardner.parley.files.credentials.CredentialRef> ret = new java.util.ArrayList<>();
+			for(String k : entries.keySet()) {
+				ret.add(new us.bringardner.parley.files.credentials.CredentialRef("keychain", k));
+			}
+			return ret;
+		}
+	}
+
+	private static final List<ConnectionSetting> WITH_USER = List.of(
+			ConnectionSetting.text("host", "Host"), ConnectionSetting.text("user", "User"),
+			ConnectionSetting.secret("password", "Password"));
+
+	@Test
+	public void aReferenceIsShownInClearAndAPasswordMasked() throws Exception {
+		Fx.run(()->{
+			ConnectionSettingsForm form = new ConnectionSettingsForm();
+			form.setSettings(WITH_USER, props("host", "prod", "user", "deploy", "password", "@env:DB_PW"));
+			PasswordField pw = (PasswordField) form.fieldFor("password");
+			assertFalse(pw.isVisible(), "a reference isn't a secret: the clear field shows it");
+			pw.setText("hunter2");
+			assertTrue(pw.isVisible(), "a password is masked");
+			assertEquals("hunter2", form.getConnectionProperties().getProperty("password"));
+		});
+	}
+
+	@Test
+	public void aTypedPasswordCanBeSavedToTheKeychain() throws Exception {
+		FakeKeychain keychain = new FakeKeychain();
+		us.bringardner.parley.files.credentials.Credentials.register(keychain);
+		try {
+			Fx.run(()->{
+				ConnectionSettingsForm form = new ConnectionSettingsForm();
+				form.setFactoryId("sftp");
+				form.setSettings(WITH_USER, props("host", "prod", "user", "deploy", "password", "hunter2"));
+				CheckBox save = form.saveToKeychainFor("password");
+				assertTrue(save != null && !save.isDisabled());
+				save.setSelected(true);
+				Properties p = form.getConnectionProperties();
+				assertEquals("@keychain:parley/sftp/deploy@prod", p.getProperty("password"));
+				assertEquals("hunter2", keychain.entries.get("parley/sftp/deploy@prod"));
+				assertFalse(save.isSelected());
+				assertTrue(save.isDisabled(), "nothing to save once the field holds a reference");
+				assertEquals(List.of("@keychain:parley/sftp/deploy@prod"), ConnectionSettingsForm.storedReferences());
+			});
+		} finally {
+			us.bringardner.parley.files.credentials.Credentials.restoreDefaults();
+		}
+	}
+
+	@Test
+	public void anUnknownStoreIsReported() throws Exception {
+		Fx.run(()->{
+			ConnectionSettingsForm form = new ConnectionSettingsForm();
+			form.setSettings(WITH_USER, props("password", "@vault:prod"));
+			assertEquals(List.of("Password: there is no credential store called 'vault' (@vault:prod)"), form.validateValues());
+		});
+	}
 }
