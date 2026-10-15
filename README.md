@@ -1,11 +1,11 @@
 # parley-files-fx
 
-JavaFX user interface for [parley-files](https://github.com/tony-bringardner/parley-files). The Swing
-counterpart is [parley-files-swing](https://github.com/tony-bringardner/parley-files-swing).
+JavaFX user interface for [parley-files](https://github.com/parley-project/parley-files). The Swing
+counterpart is [parley-files-swing](https://github.com/parley-project/parley-files-swing).
 
 ## Why this library exists
 
-[parley-files](https://github.com/tony-bringardner/parley-files) reads and writes files on any file
+[parley-files](https://github.com/parley-project/parley-files) reads and writes files on any file
 system: local, SFTP, FTP, a database. Servers, command-line tools and shells use it with no screen
 at all, so it must not need a UI toolkit. But a desktop application also needs to show those file
 systems. JavaFX's `FileChooser` only knows local files, and it can't be extended. This library is
@@ -56,7 +56,7 @@ UI-free and lives in parley-files, package `us.bringardner.parley.files.browse`.
 
 ## Swing alternatives
 
-What to use from [parley-files-swing](https://github.com/tony-bringardner/parley-files-swing) in a
+What to use from [parley-files-swing](https://github.com/parley-project/parley-files-swing) in a
 Swing application instead.
 
 | parley-files-fx | In parley-files-swing |
@@ -88,7 +88,7 @@ Stylesheet rules take precedence over the colors the library sets in code.
 
 - Java 11, like the other Parley modules, with JavaFX 17 LTS (17.0.20). On JavaFX 20 or later the
   file table's last column takes the spare width; on 17 every column shares it.
-- parley-files and [fx-widgets](https://github.com/tony-bringardner/fx-widgets)
+- parley-files and [fx-widgets](https://github.com/parley-project/fx-widgets)
 
 ## Building
 
