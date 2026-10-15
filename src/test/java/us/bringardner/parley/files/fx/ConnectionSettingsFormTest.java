@@ -127,8 +127,13 @@ public class ConnectionSettingsFormTest {
 		@Override public boolean isAvailable() { return true; }
 		@Override public boolean canStore() { return true; }
 		@Override public char[] resolve(us.bringardner.parley.files.credentials.CredentialRef ref,
-				us.bringardner.parley.files.credentials.CredentialRequest req) {
-			return entries.get(ref.locator()).toCharArray();
+				us.bringardner.parley.files.credentials.CredentialRequest req)
+				throws us.bringardner.parley.files.credentials.CredentialException {
+			String v = entries.get(ref.locator());
+			if( v == null ) {
+				throw new us.bringardner.parley.files.credentials.CredentialException(ref, "not found");
+			}
+			return v.toCharArray();
 		}
 		@Override public void store(us.bringardner.parley.files.credentials.CredentialRef ref, char[] secret) {
 			entries.put(ref.locator(), new String(secret));
@@ -163,6 +168,10 @@ public class ConnectionSettingsFormTest {
 	public void aTypedPasswordCanBeSavedToTheKeychain() throws Exception {
 		FakeKeychain keychain = new FakeKeychain();
 		us.bringardner.parley.files.credentials.Credentials.register(keychain);
+		// a keystore with no file, so the person's own ~/.parley/credentials.p12 isn't read
+		us.bringardner.parley.files.credentials.Credentials.register(
+				new us.bringardner.parley.files.credentials.KeyStoreCredentialProvider(
+						java.nio.file.Files.createTempDirectory("parley-test").resolve("none.p12")));
 		try {
 			Fx.run(()->{
 				ConnectionSettingsForm form = new ConnectionSettingsForm();
