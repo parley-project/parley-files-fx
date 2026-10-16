@@ -1,6 +1,6 @@
 # Changelog
 
-## parley-files-fx 1.0.0 (unreleased)
+## parley-files-fx 1.0.0 (2026-10-16)
 
 First version. Runs on Java 11, like the other Parley modules, with JavaFX 17 LTS.
 

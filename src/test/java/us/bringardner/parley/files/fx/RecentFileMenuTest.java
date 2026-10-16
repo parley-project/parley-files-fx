@@ -120,7 +120,7 @@ public class RecentFileMenuTest {
 		assertEquals("/b.txt", ((FileSource) opened.get(0)).getCanonicalPath());
 		assertEquals("/a.txt", ((FileSource) opened.get(1)).getCanonicalPath());
 		Fx.run(()->{
-			assertEquals("/a.txt", menu.getRecentEntries().get(0).path);
+			assertEquals("/a.txt", menu.getRecentEntries().get(0).getPath());
 			assertEquals("memory:/a.txt", menu.getItems().get(2).getText());
 		});
 		assertFalse(node.get(RecentFileMenu.PREF_RECENT_LIST, "").contains("typed"));
@@ -167,8 +167,8 @@ public class RecentFileMenuTest {
 			}
 			TestMenu again = new TestMenu(node);
 			assertEquals(2, again.getMaxFiles());
-			assertEquals("/2.txt", again.getRecentEntries().get(0).path);
-			assertEquals("/3.txt", again.getRecentEntries().get(1).path);
+			assertEquals("/2.txt", again.getRecentEntries().get(0).getPath());
+			assertEquals("/3.txt", again.getRecentEntries().get(1).getPath());
 			assertEquals(2, again.getRecentEntries().size());
 		});
 	}
