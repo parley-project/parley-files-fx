@@ -1,5 +1,13 @@
 # Changelog
 
+## parley-files-fx 1.1.0 (unreleased)
+
+### Changed
+
+- The file chooser and connection dialogs, and the questions and messages they show, take on the
+  application's gradient look when its window has fx-widgets' `GradientLook`; otherwise they look
+  as before. fx-widgets and swing-widgets 1.1.0.
+
 ## parley-files-fx 1.0.0 (2026-10-16)
 
 First version. Runs on Java 11, like the other Parley modules, with JavaFX 17 LTS.

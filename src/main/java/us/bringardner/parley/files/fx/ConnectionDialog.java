@@ -25,6 +25,7 @@
  */
 package us.bringardner.parley.files.fx;
 
+import us.bringardner.fx.gradient.GradientLook;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -230,6 +231,7 @@ public class ConnectionDialog extends Dialog<FileSourceFactory> {
 		Alert alert = new Alert(type, text);
 		alert.setHeaderText(title);
 		alert.initOwner(getDialogPane().getScene() == null ? null : getDialogPane().getScene().getWindow());
+		GradientLook.follow(alert);
 		alert.showAndWait();
 	}
 
@@ -243,6 +245,8 @@ public class ConnectionDialog extends Dialog<FileSourceFactory> {
 		if( owner != null ) {
 			d.initOwner(owner);
 		}
+		// the application's gradient look, if its window has fx-widgets' GradientLook
+		GradientLook.follow(d);
 		return d.showAndWait();
 	}
 }

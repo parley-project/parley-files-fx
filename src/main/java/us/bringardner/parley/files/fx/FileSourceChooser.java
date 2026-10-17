@@ -25,6 +25,7 @@
  */
 package us.bringardner.parley.files.fx;
 
+import us.bringardner.fx.gradient.GradientLook;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -120,6 +121,8 @@ public class FileSourceChooser {
 		if( owner != null ) {
 			dialog.initOwner(owner);
 		}
+		// the application's gradient look, if its window has fx-widgets' GradientLook
+		GradientLook.follow(dialog);
 		dialog.setTitle(title != null ? title : mode == ChooserPane.Mode.SAVE ? "Save" : "Open");
 		dialog.setResizable(true);
 		ButtonType accept = new ButtonType(mode == ChooserPane.Mode.SAVE ? "Save" : "Open", ButtonData.OK_DONE);
@@ -130,6 +133,7 @@ public class FileSourceChooser {
 			Alert a = new Alert(AlertType.CONFIRMATION, text, ButtonType.YES, ButtonType.NO);
 			a.setHeaderText(heading);
 			a.initOwner(dialog.getDialogPane().getScene().getWindow());
+			GradientLook.follow(a);
 			return a.showAndWait().filter(b->b == ButtonType.YES).isPresent();
 		};
 		pane.connect = ()->ConnectionDialog.connect(dialog.getDialogPane().getScene().getWindow());
