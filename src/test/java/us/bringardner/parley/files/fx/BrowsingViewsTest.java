@@ -1,6 +1,7 @@
 package us.bringardner.parley.files.fx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -179,6 +180,36 @@ public class BrowsingViewsTest {
 		Fx.waitFor(()->top.getChildren().size() == 2);
 		assertEquals(List.of(".git", "sub"), Fx.call(()->top.getChildren().stream().map(i->i.getValue().getName()).collect(Collectors.toList())));
 		assertSame(dir, Fx.call(()->top.getValue()));
+	}
+
+	/** A listing that fails (a remote store that's briefly gone) closes the folder; reopening it tries again. */
+	@Test
+	public void aFolderThatCantBeListedIsTriedAgain() throws Exception {
+		java.util.concurrent.atomic.AtomicInteger failures = new java.util.concurrent.atomic.AtomicInteger(1);
+		FileSource flaky = (FileSource) java.lang.reflect.Proxy.newProxyInstance(FileSource.class.getClassLoader(),
+				new Class<?>[] { FileSource.class }, (proxy, m, args) -> {
+					if( m.getName().equals("listFiles") && failures.getAndDecrement() > 0 ) {
+						throw new IOException("the store is away");
+					}
+					try {
+						return m.invoke(dir, args);
+					} catch (java.lang.reflect.InvocationTargetException e) {
+						throw e.getCause();
+					}
+				});
+		FolderTree tree = Fx.call(FolderTree::new);
+		TreeItem<FileSource> top = Fx.call(()->{
+			tree.setTopFolders(List.of(flaky));
+			TreeItem<FileSource> item = tree.getRoot().getChildren().get(0);
+			item.setExpanded(true);
+			return item;
+		});
+		Fx.waitFor(()->!top.isExpanded());
+		assertFalse(Fx.call(()->((FolderTree.FolderItem) top).isListed()), "not taken for an empty folder");
+		assertFalse(Fx.call(top::isLeaf), "it can still be opened");
+		Fx.run(()->top.setExpanded(true));
+		Fx.waitFor(()->((FolderTree.FolderItem) top).isListed());
+		assertEquals(List.of("sub"), Fx.call(()->top.getChildren().stream().map(i->i.getValue().getName()).collect(Collectors.toList())));
 	}
 
 	@Test

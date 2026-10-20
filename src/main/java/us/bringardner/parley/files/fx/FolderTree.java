@@ -40,7 +40,8 @@ import us.bringardner.parley.files.browse.FileEntry;
 
 /**
  * A tree of directories, like a file browser's sidebar. A directory's children are listed in
- * the background the first time it's expanded. Use it on the JavaFX application thread.
+ * the background the first time it's expanded; if that fails, it closes again and the next
+ * expand tries again. Use it on the JavaFX application thread.
  */
 public class FolderTree extends TreeView<FileSource> {
 
@@ -99,9 +100,12 @@ public class FolderTree extends TreeView<FileSource> {
 				listing = false;
 			});
 			task.setOnFailed(e->{
-				getChildren().clear();
-				listed = true;
+				// not listed: it can't be told from an empty folder, and the failure may pass (a
+				// remote store), so it closes again and the next expand tries again
 				listing = false;
+				listed = false;
+				getChildren().setAll(List.of(new TreeItem<>(null)));
+				setExpanded(false);
 			});
 			Background.EXECUTOR.execute(task);
 		}
