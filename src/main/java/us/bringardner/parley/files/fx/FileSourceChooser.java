@@ -65,7 +65,14 @@ public class FileSourceChooser {
 	private final List<FileSourceFilter> filters = new ArrayList<>();
 	private boolean acceptAllFilter = true;
 	private SelectionMode selectionMode = SelectionMode.FILES;
-	private Preferences preferences = Preferences.userNodeForPackage(FileSourceChooser.class);
+	/**
+	 * Where the choosers remember whether hidden files and extensions are shown: one node for this
+	 * chooser and parley-files-swing's FileSourceChooserDialog, so both show the same.
+	 * @since 2.0.0
+	 */
+	public static final String PREFERENCES_NODE = "/us/bringardner/parley/files/chooser";
+
+	private Preferences preferences = Preferences.userRoot().node(PREFERENCES_NODE);
 
 	public String getTitle() { return title; }
 	/** The window title; null for "Open" or "Save". */

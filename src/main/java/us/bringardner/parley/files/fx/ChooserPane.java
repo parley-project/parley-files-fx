@@ -68,7 +68,7 @@ class ChooserPane extends BorderPane {
 
 	enum Mode { OPEN, OPEN_MULTIPLE, SAVE }
 
-	static final String SHOW_HIDDEN_PREFERENCE = "ShowHiddenFiles";
+	static final String SHOW_HIDDEN_PREFERENCE = "ShowHidden";
 	static final String SHOW_EXTENSIONS_PREFERENCE = "ShowExtensions";
 
 	private final Mode mode;

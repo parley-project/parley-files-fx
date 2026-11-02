@@ -135,8 +135,14 @@ public class ConnectionSettingsFormTest {
 			}
 			return v.toCharArray();
 		}
+		us.bringardner.parley.files.credentials.CredentialRequest stored;
 		@Override public void store(us.bringardner.parley.files.credentials.CredentialRef ref, char[] secret) {
 			entries.put(ref.locator(), new String(secret));
+		}
+		@Override public void store(us.bringardner.parley.files.credentials.CredentialRef ref, char[] secret,
+				us.bringardner.parley.files.credentials.CredentialRequest request) {
+			stored = request;
+			store(ref, secret);
 		}
 		@Override public List<us.bringardner.parley.files.credentials.CredentialRef> list() {
 			List<us.bringardner.parley.files.credentials.CredentialRef> ret = new java.util.ArrayList<>();
@@ -183,6 +189,8 @@ public class ConnectionSettingsFormTest {
 				Properties p = form.getConnectionProperties();
 				assertEquals("@keychain:parley/sftp/deploy@prod", p.getProperty("password"));
 				assertEquals("hunter2", keychain.entries.get("parley/sftp/deploy@prod"));
+				assertEquals("sftp", keychain.stored.factoryId());
+				assertEquals("password", keychain.stored.property());
 				assertFalse(save.isSelected());
 				assertTrue(save.isDisabled(), "nothing to save once the field holds a reference");
 				assertEquals(List.of("@keychain:parley/sftp/deploy@prod"), ConnectionSettingsForm.storedReferences());

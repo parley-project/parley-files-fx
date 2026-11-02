@@ -67,6 +67,7 @@ import us.bringardner.parley.files.FileSourceFactory;
 import us.bringardner.parley.files.credentials.CredentialException;
 import us.bringardner.parley.files.credentials.CredentialProvider;
 import us.bringardner.parley.files.credentials.CredentialRef;
+import us.bringardner.parley.files.credentials.CredentialRequest;
 import us.bringardner.parley.files.credentials.Credentials;
 
 /**
@@ -306,7 +307,7 @@ public class ConnectionSettingsForm extends VBox {
 	/** A menu of the references the credential stores can list, and an item to type one. */
 	private void chooseReference(PasswordField field, Button under) {
 		ContextMenu menu = new ContextMenu();
-		for(String ref : storedReferences()) {
+		for(String ref : storedReferences(factoryId)) {
 			MenuItem item = new MenuItem(ref);
 			item.setOnAction(e->field.setText(ref));
 			menu.getItems().add(item);
@@ -340,13 +341,23 @@ public class ConnectionSettingsForm extends VBox {
 	 * locked keystore is left out rather than asking for its master password here).
 	 */
 	static List<String> storedReferences() {
+		return storedReferences(null);
+	}
+
+	/**
+	 * The references the stores can list where this factory's secrets are kept (its
+	 * parley.credentials.&lt;id&gt;.keyStore, else every caller's); null: every caller's.
+	 */
+	static List<String> storedReferences(String factoryId) {
+		CredentialRequest request = factoryId == null || factoryId.isBlank() ? null
+				: new CredentialRequest(factoryId, "", "", "");
 		List<String> ret = new ArrayList<>();
 		for(CredentialProvider p : Credentials.providers()) {
 			if( !p.isAvailable() || !p.canStore()) {
 				continue;
 			}
 			try {
-				for(CredentialRef r : p.list()) {
+				for(CredentialRef r : request == null ? p.list() : p.list(request)) {
 					ret.add(r.toString());
 				}
 			} catch (CredentialException | RuntimeException e) {
@@ -375,7 +386,9 @@ public class ConnectionSettingsForm extends VBox {
 			try {
 				CredentialRef ref = ConnectionSettings.suggestedKeychainRef(factoryId,
 						values.getProperty("user"), values.getProperty("host"));
-				Credentials.store(ref, secret);
+				// where this factory's secrets are read (parley.credentials.<id>.keyStore)
+				Credentials.store(ref, secret, new CredentialRequest(factoryId, r.setting.key(),
+						values.getProperty("host"), values.getProperty("user")));
 				pw.setText(ref.toString());
 				save.setSelected(false);
 			} catch (CredentialException e) {
