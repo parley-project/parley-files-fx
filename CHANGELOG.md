@@ -17,7 +17,7 @@
 
 - The file chooser and connection dialogs, and the questions and messages they show, take on the
   application's gradient look when its window has fx-widgets' `GradientLook`; otherwise they look
-  as before. fx-widgets and swing-widgets 1.1.0.
+  as before. fx-widgets and swing-widgets 2.0.0.
 
 ## parley-files-fx 1.0.0 (2026-10-16)
 
